@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WallpaperHub · Beautiful 4K Wallpapers</title>
+  <meta name="description" content="Browse stunning 4K wallpapers by category. Search, like, and download — all in a smooth, animated, single‑file HTML page."/>
+  <style>
+    /* =============================
+       THEME — Purple/Blue Gradient
+       ============================= */
+    :root {
+      --bg: #0b0c14;
+      --card: #10131d;
+      --muted: #a3acc4;
+      --text: #eaf1ff;
+      --brand-1: #6a5cff;
+      --brand-2: #00d4ff;
+      --ring: 0 0 0 3px rgba(106,92,255,.25);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --speed: 260ms;
+    }
+
+    * { box-sizing: border-box }
+    html, body { height: 100% }
+    body {
+      margin: 0;
+      font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 10% -10%, rgba(0,212,255,.12), transparent 60%),
+        radial-gradient(900px 700px at 110% 10%, rgba(106,92,255,.14), transparent 55%),
+        linear-gradient(180deg, #0a0c13, #0b0c14 50%, #080a10);
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none }
+    button { font: inherit }
+
+    /* ===== Utility ===== */
+    .container { width: min(1200px, 92vw); margin: 0 auto }
+    .chip { padding: .55rem .9rem; border-radius: 999px; backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.08); color: #dbebff; transition: transform var(--speed), background var(--speed), border var(--speed)}
+    .chip:hover { transform: translateY(-2px); border-color: rgba(0,212,255,.45) }
+    .gradient-text { background: linear-gradient(90deg, var(--brand-1), var(--brand-2)); -webkit-background-clip: text; background-clip: text; color: transparent }
+    .glass { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border: 1px solid rgba(255,255,255,.08); box-shadow: var(--shadow); }
+    .btn { cursor: pointer; border: 0; color: #fff; border-radius: 999px; padding: .7rem 1rem; display: inline-flex; align-items: center; gap:.5rem; transition: transform var(--speed), filter var(--speed)}
+    .btn:hover { transform: translateY(-2px) }
+    .btn-primary { background: linear-gradient(135deg, var(--brand-1), var(--brand-2)) }
+    .btn-ghost { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14) }
+
+    /* ===== Header ===== */
+    header { position: fixed; inset: 0 0 auto; z-index: 50; backdrop-filter: saturate(160%) blur(10px);
+      background: linear-gradient(180deg, rgba(7,9,14,.7), rgba(7,9,14,.25)); border-bottom: 1px solid rgba(255,255,255,.06) }
+    .nav { display:flex; align-items:center; justify-content:space-between; height:64px }
+    .logo { display:flex; align-items:center; gap:.7rem; font-weight:700; letter-spacing:.3px }
+    .logo-mark { inline-size:28px; block-size:28px; border-radius:10px; background: linear-gradient(135deg, var(--brand-1), var(--brand-2)); box-shadow: 0 6px 18px rgba(0,212,255,.35) }
+    .nav-links { display:flex; gap:.8rem }
+
+    /* ===== Hero / Slideshow ===== */
+    .hero { position: relative; padding: 120px 0 80px; isolation: isolate }
+    .slides { position:absolute; inset:0; z-index:-2; overflow:hidden; border-radius:0 0 30px 30px }
+    .slides img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition: opacity 900ms ease }
+    .slides img.active { opacity: .9 }
+    .slides::after { content:""; position:absolute; inset:0; background: radial-gradient(60% 60% at 50% 60%, rgba(12,13,21,0) 0%, rgba(12,13,21,.35) 55%, rgba(12,13,21,.75) 100%) }
+
+    /* Floating particles */
+    .particles { position:absolute; inset:0; z-index:-1; overflow:hidden; pointer-events:none }
+    .particle { position:absolute; width:6px; height:6px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.15)); opacity:.65;
+      animation: float var(--d) linear infinite; transform: translateY(100vh) scale(.8) }
+    @keyframes float { to { transform: translateY(-10vh) scale(1.1) } }
+
+    .hero-inner { display:grid; gap:1.1rem }
+    .hero h1 { margin: 10px 0 0; font-size: clamp(2rem, 3.2vw, 3rem); line-height:1.12 }
+    .hero p { color: var(--muted); margin:0 0 .3rem }
+
+    .searchbar { display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; margin-top:.6rem }
+    .searchbar input { flex:1 1 360px; min-width:240px; padding: .9rem 1rem; border-radius: 12px; color: #e9f2ff;
+      background: rgba(9,12,18,.75); border: 1px solid rgba(255,255,255,.14); outline:none; transition: box-shadow var(--speed), border var(--speed) }
+    .searchbar input:focus { box-shadow: var(--ring); border-color: rgba(106,92,255,.65) }
+
+    .dots { display:flex; gap:.45rem; align-items:center; margin-top:.4rem }
+    .dot { width:9px; height:9px; border-radius:50%; background: rgba(255,255,255,.35); cursor:pointer; transition: transform var(--speed), background var(--speed) }
+    .dot.active { background: linear-gradient(135deg, var(--brand-1), var(--brand-2)); transform: scale(1.2) }
+
+    /* ===== Categories ===== */
+    .categories { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.9rem }
+    .categories .chip { font-weight:600; letter-spacing:.2px }
+
+    /* ===== Grid ===== */
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin: 26px 0 0 }
+    .card { grid-column: span 12; border-radius: var(--radius); position:relative; overflow:hidden; transform-style: preserve-3d;
+      transition: transform var(--speed), box-shadow var(--speed), border-color var(--speed) }
+    .card:hover { transform: translateY(-4px) }
+    .card-media { position:relative; aspect-ratio: 16/10; overflow:hidden }
+    .card-media img { width:100%; height:100%; object-fit:cover; display:block; filter: saturate(1.1) contrast(1.05) }
+    .card-media::after { content:""; position:absolute; inset:0; background: linear-gradient(180deg, transparent, rgba(5,7,11,.75) 80%)}
+    .card-body { position:absolute; inset:auto 0 0 0; padding:12px 14px; display:flex; align-items:end; justify-content:space-between }
+    .meta { display:flex; gap:.55rem; align-items:center; font-size:.9rem; color:#cfe0ff }
+    .badge { padding:.25rem .55rem; border-radius:999px; background: rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.22) }
+    .actions { display:flex; gap:.45rem }
+    .iconbtn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem .7rem; border-radius:999px; background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.14); cursor:pointer; transition: transform var(--speed), background var(--speed) }
+    .iconbtn:hover { transform: translateY(-2px) }
+    .icon { font-size: 16px }
+
+    /* Responsive columns */
+    @media (min-width: 560px) { .card { grid-column: span 6 } }
+    @media (min-width: 980px)  { .card { grid-column: span 4 } }
+
+    /* ===== Stats ===== */
+    .stats { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin: 26px 0 }
+    .stat { padding:16px; border-radius:16px } 
+    .stat h3 { margin:0; font-size: .95rem; color:#c3cdef; font-weight:600 }
+    .stat p { margin:.25rem 0 0; font-size: clamp(1.2rem, 2.4vw, 1.8rem); font-weight:800 }
+
+    /* ===== Reveal on scroll ===== */
+    .reveal { opacity:0; transform: translateY(14px); transition: opacity 600ms ease, transform 600ms ease }
+    .reveal.visible { opacity:1; transform: translateY(0) }
+
+    /* ===== Footer ===== */
+    footer { margin: 30px 0 60px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.08) }
+    .footer-grid { display:grid; gap: 16px; grid-template-columns: repeat(12, 1fr) }
+    .fcol { grid-column: span 12 }
+    .social { display:flex; gap:.6rem }
+    .social a { display:inline-flex; padding:.55rem .8rem; border-radius:12px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12) }
+    @media (min-width: 760px){ .fcol { grid-column: span 4 } }
+  </style>
+</head>
+<body>
+  <!-- ===== Header ===== -->
+  <header>
+    <div class="container nav">
+      <div class="logo">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>Wallpaper<span class="gradient-text">Hub</span></span>
+      </div>
+      <nav class="nav-links">
+        <a class="chip" href="#grid">Wallpapers</a>
+        <a class="chip" href="#stats">Stats</a>
+        <a class="chip" href="#footer">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Hero / Slideshow ===== -->
+  <section class="hero">
+    <div class="slides" id="slides">
+      <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2000&auto=format&fit=crop" alt="Snowy mountains at sunrise" class="active"/>
+      <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2000&auto=format&fit=crop" alt="Abstract nebula space clouds"/>
+      <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=2000&auto=format&fit=crop" alt="Night city skyline with neon"/>
+    </div>
+    <div class="particles" id="particles"></div>
+
+    <div class="container hero-inner">
+      <p class="gradient-text" style="font-weight:700; letter-spacing:.4px">4K · Ultra HD · Free Downloads</p>
+      <h1>Stunning wallpapers for <span class="gradient-text">every mood</span>.</h1>
+      <p>Search by name, filter by category, like your favorites, and download instantly. Smooth, modern, and fast — all in one HTML file.</p>
+      <div class="searchbar">
+        <input id="search" type="search" placeholder="Search wallpapers (e.g. ‘aurora’, ‘city’, ‘forest’)" />
+        <button class="btn btn-primary" id="clearSearch">Clear</button>
+      </div>
+      <div class="categories" id="categories">
+        <button class="chip active" data-cat="all">All</button>
+        <button class="chip" data-cat="Nature">Nature</button>
+        <button class="chip" data-cat="Abstract">Abstract</button>
+        <button class="chip" data-cat="Space">Space</button>
+        <button class="chip" data-cat="City">City</button>
+        <button class="chip" data-cat="Animals">Animals</button>
+        <button class="chip" data-cat="Minimal">Minimal</button>
+      </div>
+      <div class="dots" id="dots" aria-label="Slideshow navigation"></div>
+    </div>
+  </section>
+
+  <!-- ===== Grid ===== -->
+  <main id="grid" class="container">
+    <section class="grid" id="gridWrap">
+      <!-- 8 demo wallpapers with categories -->
+      
+      <!-- Nature 1 -->
+      <article class="card reveal" data-title="Aurora Peaks" data-category="Nature">
+        <div class="card-media">
+          <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1600&auto=format&fit=crop" alt="Aurora over mountain range">
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <span class="badge">Nature</span>
+            <strong>Aurora Peaks</strong>
+          </div>
+          <div class="actions">
+            <a class="iconbtn dl" href="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=3840&auto=format&fit=crop" download>
+              <span class="icon">⬇</span><span class="count" data-type="d">120</span>
+            </a>
+            <button class="iconbtn like"><span class="icon">❤</span><span class="count" data-type="l">56</span></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Abstract 1 -->
+      <article class="card reveal" data-title="Vaporwave Swirl" data-category="Abstract">
+        <div class="card-media">
+          <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop" alt="Abstract gradient swirl">
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <span class="badge">Abstract</span>
+            <strong>Vaporwave Swirl</strong>
+          </div>
+          <div class="actions">
+            <a class="iconbtn dl" href="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=3840&auto=format&fit=crop" download>
+              <span class="icon">⬇</span><span class="count" data-type="d">212</span>
+            </a>
+            <button class="iconbtn like"><span class="icon">❤</span><span class="count" data-type="l">98</span></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Space 1 -->
+      <article class="card reveal" data-title="Nebula Drift" data-category="Space">
+        <div class="card-media">
+          <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1600&auto=format&fit=crop" alt="Colorful nebula clouds in space">
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <span class="badge">Space</span>
+            <strong>Nebula Drift</strong>
+          </div>
+          <div class="actions">
+            <a class="iconbtn dl" href="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=3840&auto=format&fit=crop" download>
+              <span class="icon">⬇</span><span class="count" data-type="d">330</span>
+            </a>
+            <button class="iconbtn like"><span class="icon">❤</span><span class="count" data-type="l">152</span></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- City 1 -->
+      <article class="card reveal" data-title="Neon Skyline" data-category="City">
+        <div class="card-media">
+          <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1600&auto=format&fit=crop" alt="Neon city skyline at night">
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <span class="badge">City</span>
+            <strong>Neon Skyline</strong>
+          </div>
+          <div class="actions">
+            <a class="iconbtn dl" href="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=3840&auto=format&fit=crop" download>
+              <span class="icon">⬇</span><span class="count" data-type="d">147</span>
+            </a>
+            <button class="iconbtn like"><span class="icon">❤</span><span class="count" data-type="l">61</span></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Animals 1 -->
+      <article class="card reveal" data-title="Majestic Tiger" data-category="Animals">
+        <div class="card-media">
+          <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop" alt="Close-up tiger portrait">
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <span class="badge">Animals</span>
+            <strong>Majestic Tiger</strong>
+          </div>
+          <div class="actions">
+            <a class="iconbtn dl" href="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=3840&auto=format&fit=crop" download>
+              <span class="icon">⬇</span><span class="count" data-type="d">260</span>
+            </a>
+            <button class="iconbtn like"><span class="icon">❤</span><span class="count" data-type="l">134</span></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Nature 2 -->
+      <article class="card reveal" data-title="Forest Mist" data-category="Nature">
+        <div class="card-media">
+          <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1600&auto=format&fit=crop" alt="Misty forest and mountains">
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <span class="badge">Nature</span>
+            <strong>Forest Mist</strong>
+          </div>
+          <div class="actions">
+            <a class="iconbtn dl" href="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=3840&auto=format&fit=crop" download>
+              <span class="icon">⬇</span><span class="count" data-type="d">188</span>
+            </a>
+            <button class="iconbtn like"><span class="icon">❤</span><span class="count" data-type="l">75</span></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Minimal 1 -->
+      <article class="card reveal" data-title="Pastel Shapes" data-category="Minimal">
+        <div class="card-media">
+          <img src="https://images.unsplash.com/photo-1526312426976-593c2b99956b?q=80&w=1600&auto=format&fit=crop" alt="Minimal pastel shapes">
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <span class="badge">Minimal</span>
+            <strong>Pastel Shapes</strong>
+          </div>
+          <div class="actions">
+            <a class="iconbtn dl" href="https://images.unsplash.com/photo-1526312426976-593c2b99956b?q=80&w=3840&auto=format&fit=crop" download>
+              <span class="icon">⬇</span><span class="count" data-type="d">92</span>
+            </a>
+            <button class="iconbtn like"><span class="icon">❤</span><span class="count" data-type="l">40</span></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- City 2 -->
+      <article class="card reveal" data-title="Dawn Bridge" data-category="City">
+        <div class="card-media">
+          <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop" alt="Bridge at dawn with haze">
+        </div>
+        <div class="card-body">
+          <div class="meta">
+            <span class="badge">City</span>
+            <strong>Dawn Bridge</strong>
+          </div>
+          <div class="actions">
+            <a class="iconbtn dl" href="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=3840&auto=format&fit=crop" download>
+              <span class="icon">⬇</span><span class="count" data-type="d">175</span>
+            </a>
+            <button class="iconbtn like"><span class="icon">❤</span><span class="count" data-type="l">63</span></button>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===== Stats ===== -->
+    <section id="stats" class="stats reveal">
+      <div class="stat glass">
+        <h3>Total Downloads</h3>
+        <p id="totalDownloads">0</p>
+      </div>
+      <div class="stat glass">
+        <h3>Total Likes</h3>
+        <p id="totalLikes">0</p>
+      </div>
+      <div class="stat glass">
+        <h3>Wallpapers</h3>
+        <p id="totalWalls">8</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer id="footer" class="container">
+    <div class="footer-grid">
+      <div class="fcol">
+        <div class="logo" style="margin-bottom:.5rem">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>Wallpaper<span class="gradient-text">Hub</span></span>
+        </div>
+        <p style="color:var(--muted); margin:0">Free, community‑curated wallpapers. Built as a fast, modern, single‑file demo.</p>
+      </div>
+      <div class="fcol">
+        <strong>Links</strong>
+        <div style="margin-top:.5rem; display:flex; gap:.6rem; flex-wrap:wrap">
+          <a class="chip" href="#grid">Wallpapers</a>
+          <a class="chip" href="#stats">Statistics</a>
+          <a class="chip" href="#">Privacy</a>
+          <a class="chip" href="#">Terms</a>
+        </div>
+      </div>
+      <div class="fcol">
+        <strong>Social</strong>
+        <div class="social" style="margin-top:.5rem">
+          <a href="#" aria-label="Twitter">✦</a>
+          <a href="#" aria-label="Instagram">◎</a>
+          <a href="#" aria-label="Dribbble">◈</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // Helper: number animation
+    // =============================
+    function animateNumber(el, to) {
+      const from = +el.textContent || 0;
+      const diff = to - from;
+      const dur = 600; const start = performance.now();
+      function step(now){
+        const p = Math.min(1, (now - start)/dur);
+        el.textContent = Math.round(from + diff * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // =============================
+    // Slideshow
+    // =============================
+    const slides = [...document.querySelectorAll('#slides img')];
+    const dotsWrap = document.getElementById('dots');
+    let slideIx = 0, slideTimer;
+
+    function setSlide(i){
+      slideIx = i % slides.length; if (slideIx < 0) slideIx = slides.length - 1;
+      slides.forEach((img, ix)=> img.classList.toggle('active', ix === slideIx));
+      [...dotsWrap.children].forEach((d, ix)=> d.classList.toggle('active', ix === slideIx));
+    }
+    function nextSlide(){ setSlide(slideIx + 1) }
+    function startAuto(){ clearInterval(slideTimer); slideTimer = setInterval(nextSlide, 5000) }
+    slides.forEach((_, ix)=>{
+      const d = document.createElement('button'); d.className = 'dot' + (ix ? '' : ' active');
+      d.addEventListener('click', ()=>{ setSlide(ix); startAuto(); });
+      dotsWrap.appendChild(d);
+    });
+    startAuto();
+
+    // =============================
+    // Floating particles
+    // =============================
+    const particles = document.getElementById('particles');
+    for (let i=0;i<36;i++){
+      const s = document.createElement('span');
+      s.className = 'particle';
+      const left = Math.random()*100; const delay = Math.random()*6; const duration = 8 + Math.random()*8;
+      s.style.left = left + 'vw'; s.style.animationDelay = delay + 's'; s.style.setProperty('--d', duration+'s');
+      particles.appendChild(s);
+    }
+
+    // =============================
+    // Search + Category Filter
+    // =============================
+    const cards = [...document.querySelectorAll('.card')];
+    const search = document.getElementById('search');
+    const clearSearch = document.getElementById('clearSearch');
+    const catBar = document.getElementById('categories');
+
+    function applyFilters(){
+      const q = search.value.trim().toLowerCase();
+      const activeCat = catBar.querySelector('.chip.active')?.dataset.cat || 'all';
+      let visible = 0;
+      cards.forEach(card=>{
+        const title = card.dataset.title.toLowerCase();
+        const cat = card.dataset.category;
+        const matchQ = !q || title.includes(q);
+        const matchC = activeCat === 'all' || cat === activeCat;
+        const show = matchQ && matchC;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      // Update wallpaper count
+      document.getElementById('totalWalls').textContent = visible;
+    }
+    search.addEventListener('input', applyFilters);
+    clearSearch.addEventListener('click', ()=>{ search.value=''; applyFilters(); search.focus(); });
+    catBar.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.chip'); if (!btn) return;
+      catBar.querySelectorAll('.chip').forEach(c=> c.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilters();
+    });
+
+    // =============================
+    // Likes + Downloads + Totals
+    // =============================
+    const totalLikesEl = document.getElementById('totalLikes');
+    const totalDownloadsEl = document.getElementById('totalDownloads');
+
+    function recalcTotals(){
+      const likeCounts = [...document.querySelectorAll('.count[data-type="l"]')].map(c=> +c.textContent);
+      const dlCounts = [...document.querySelectorAll('.count[data-type="d"]')].map(c=> +c.textContent);
+      animateNumber(totalLikesEl, likeCounts.reduce((a,b)=>a+b,0));
+      animateNumber(totalDownloadsEl, dlCounts.reduce((a,b)=>a+b,0));
+    }
+    recalcTotals();
+
+    document.getElementById('gridWrap').addEventListener('click', (e)=>{
+      const likeBtn = e.target.closest('.like');
+      const dlBtn = e.target.closest('.dl');
+      if (likeBtn){
+        const c = likeBtn.querySelector('.count[data-type="l"]'); c.textContent = +c.textContent + 1; recalcTotals();
+      }
+      if (dlBtn){
+        const c = dlBtn.querySelector('.count[data-type="d"]'); c.textContent = +c.textContent + 1; recalcTotals();
+      }
+    });
+
+    // =============================
+    // Reveal on scroll
+    // =============================
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if (e.isIntersecting) e.target.classList.add('visible') })
+    }, { threshold: .18 });
+    document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+
+    // =============================
+    // Subtle tilt on hover (parallax)
+    // =============================
+    cards.forEach(card=>{
+      const media = card.querySelector('.card-media');
+      media.addEventListener('pointermove', (e)=>{
+        const r = media.getBoundingClientRect();
+        const x = (e.clientX - r.left)/r.width - .5;
+        const y = (e.clientY - r.top)/r.height - .5;
+        media.style.transform = `perspective(800px) rotateY(${x*6}deg) rotateX(${-y*6}deg) scale(1.02)`;
+      });
+      media.addEventListener('pointerleave', ()=>{
+        media.style.transform = 'perspective(800px) rotateY(0) rotateX(0) scale(1)';
+      });
+    });
+  </script>
+</body>
+</html>
